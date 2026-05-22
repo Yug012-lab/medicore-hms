@@ -1,0 +1,102 @@
+{% extends "core/base.html" %}
+{% block title %}Book with Dr. {{ doctor.get_full_name }} — MediCore HMS{% endblock %}
+{% block page_title %}Book with Dr. {{ doctor.get_full_name }}{% endblock %}
+{% block nav_book %}active{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+  <div class="av" style="width:56px;height:56px;font-size:19px;background:var(--navy)">
+    {{ doctor.first_name|first|upper }}{{ doctor.last_name|first|upper }}
+  </div>
+  <div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--navy)">Dr. {{ doctor.get_full_name }}</div>
+    <div style="font-size:13px;color:var(--blue);font-weight:500">{{ doctor.specialty|default:"General Practice" }}</div>
+  </div>
+  <a href="{% url 'doctor_list' %}" class="btn btn-outline btn-sm" style="margin-left:auto">← Back</a>
+</div>
+
+{% if slots %}
+<div class="card anim">
+  <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:18px">
+    Available Slots — Step 2: Pick a time
+  </h3>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px" id="slot-grid">
+    {% for slot in slots %}
+    <div onclick="selectSlot('{{ slot.pk }}','{{ slot.date }}','{{ slot.start_time|time:"H:i" }}','{{ slot.end_time|time:"H:i" }}')"
+      id="slot-{{ slot.pk }}"
+      style="border:2px solid var(--border);border-radius:10px;padding:12px 18px;cursor:pointer;min-width:140px;transition:all .2s">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:2px">{{ slot.date }}</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">{{ slot.start_time|time:"H:i" }} – {{ slot.end_time|time:"H:i" }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Booking form (appears after slot selected) -->
+  <div id="booking-form" style="display:none;border-top:1px solid var(--border);padding-top:20px">
+    <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px">
+      Step 3 — Confirm Booking
+    </h3>
+    <div style="background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Appointment Summary</div>
+      <div style="font-size:14px;font-weight:700;color:var(--navy)">Dr. {{ doctor.get_full_name }} · {{ doctor.specialty }}</div>
+      <div style="font-size:13px;color:var(--blue);margin-top:2px" id="summary-time"></div>
+    </div>
+    <form method="post" id="booking-form-tag">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Reason for Visit (optional)</label>
+        <textarea name="notes" class="form-control" placeholder="Describe your symptoms or reason for the appointment..."></textarea>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:12px;color:#166534;margin-bottom:16px">
+        📅 Google Calendar events will be created for both you and the doctor.<br/>
+        📧 A confirmation email will be sent automatically.
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;padding:13px">✅ Confirm Appointment</button>
+        <button type="button" onclick="clearSlot()" class="btn btn-outline" style="flex:1;justify-content:center">Choose Different Slot</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="card anim">
+  <div class="empty-state">
+    <div class="empty-icon">🗓</div>
+    <div class="empty-title">No Available Slots</div>
+    <div class="empty-desc">Dr. {{ doctor.get_full_name }} has no available slots right now. Please check back later.</div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-primary">← Browse Other Doctors</a>
+  </div>
+</div>
+{% endif %}
+
+<script>
+let selectedSlotId = null;
+function selectSlot(id, date, start, end){
+  // Deselect previous
+  if(selectedSlotId){
+    const prev = document.getElementById('slot-'+selectedSlotId);
+    if(prev){ prev.style.borderColor='var(--border)'; prev.style.background='#fff'; prev.style.boxShadow='none'; }
+  }
+  selectedSlotId = id;
+  // Highlight selected
+  const el = document.getElementById('slot-'+id);
+  el.style.borderColor='var(--blue)';
+  el.style.background='#eff6ff';
+  el.style.boxShadow='0 4px 12px rgba(0,119,182,.15)';
+  // Update form action
+  document.getElementById('booking-form-tag').action='/book/'+id+'/';
+  // Update summary
+  document.getElementById('summary-time').textContent = date+' · '+start+' – '+end;
+  // Show form
+  document.getElementById('booking-form').style.display='block';
+  document.getElementById('booking-form').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function clearSlot(){
+  if(selectedSlotId){
+    const el = document.getElementById('slot-'+selectedSlotId);
+    if(el){ el.style.borderColor='var(--border)'; el.style.background='#fff'; el.style.boxShadow='none'; }
+  }
+  selectedSlotId=null;
+  document.getElementById('booking-form').style.display='none';
+}
+</script>
+{% endblock %}

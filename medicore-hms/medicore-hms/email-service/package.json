@@ -1,0 +1,13 @@
+{
+  "name": "medicore-email-service",
+  "version": "1.0.0",
+  "description": "MediCore HMS Serverless Email Service",
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.3"
+  },
+  "scripts": {
+    "start": "serverless offline",
+    "deploy": "serverless deploy"
+  }
+}

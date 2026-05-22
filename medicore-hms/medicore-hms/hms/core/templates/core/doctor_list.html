@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block title %}Book Appointment — MediCore HMS{% endblock %}
+{% block page_title %}Book an Appointment{% endblock %}
+{% block nav_book %}active{% endblock %}
+{% block content %}
+<p style="font-size:13px;color:var(--muted);margin-bottom:22px">Step 1 — Choose a doctor to see their available slots.</p>
+<div class="grid-auto">
+  {% for doctor in doctors %}
+  <div class="card anim" style="transition:transform .2s,box-shadow .2s;cursor:pointer" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(0,119,182,.12)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
+      <div class="av" style="width:50px;height:50px;font-size:17px;background:var(--navy)">
+        {{ doctor.first_name|first|upper }}{{ doctor.last_name|first|upper }}
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--navy)">Dr. {{ doctor.get_full_name }}</div>
+        <div style="font-size:12px;color:var(--blue);font-weight:500">{{ doctor.specialty|default:"General Practice" }}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:12px;font-weight:600;color:{% if doctor.available_count > 0 %}var(--green){% else %}var(--red){% endif %}">
+        {{ doctor.available_count }} slot{% if doctor.available_count != 1 %}s{% endif %} available
+      </span>
+    </div>
+    {% if doctor.available_count > 0 %}
+    <a href="{% url 'doctor_slots' doctor.pk %}" class="btn btn-primary" style="width:100%;justify-content:center">View Slots →</a>
+    {% else %}
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;cursor:not-allowed;opacity:.6" disabled>No Slots Available</button>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <div class="empty-icon">👨‍⚕️</div>
+    <div class="empty-title">No Doctors Available</div>
+    <div class="empty-desc">No doctors have registered yet. Check back later.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard — MediCore HMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block content %}
+<div class="stats-row anim">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,119,182,.1)">🗓</div>
+    <div><div class="stat-value">{{ total_slots }}</div><div class="stat-label">Total Slots</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(16,185,129,.1)">✅</div>
+    <div><div class="stat-value">{{ booked_slots }}</div><div class="stat-label">Booked Slots</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(124,58,237,.1)">⏰</div>
+    <div><div class="stat-value">{{ upcoming|length }}</div><div class="stat-label">Upcoming Appts</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(245,158,11,.1)">🟢</div>
+    <div><div class="stat-value">{{ available_slots }}</div><div class="stat-label">Available Slots</div></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Today's Schedule -->
+  <div class="card anim2">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--navy)">Today's Schedule</h3>
+      <a href="{% url 'slot_create' %}" class="btn btn-primary btn-sm">+ Add Slot</a>
+    </div>
+    {% if today_slots %}
+      {% for slot in today_slots %}
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="width:50px;text-align:center;background:var(--bg);border-radius:8px;padding:6px 4px;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;color:var(--blue)">{{ slot.start_time|time:"H:i" }}</div>
+          <div style="font-size:10px;color:var(--light)">{{ slot.end_time|time:"H:i" }}</div>
+        </div>
+        <div style="flex:1">
+          {% if slot.is_booked %}<div style="font-size:13px;font-weight:600">{{ slot.booking.patient.get_full_name }}</div>
+          {% else %}<div style="font-size:13px;font-weight:600;color:var(--muted)">Open Slot</div>{% endif %}
+        </div>
+        <span class="badge {% if slot.is_booked %}badge-red{% else %}badge-green{% endif %}">
+          {% if slot.is_booked %}Booked{% else %}Available{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:24px 0">
+        <div class="empty-icon">🗓</div>
+        <div class="empty-desc">No slots scheduled for today.</div>
+        <a href="{% url 'slot_create' %}" class="btn btn-primary btn-sm">+ Add Slot</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Upcoming Appointments -->
+  <div class="card anim3">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--navy)">Upcoming Appointments</h3>
+      <a href="{% url 'doctor_appointments' %}" style="font-size:12px;color:var(--blue);font-weight:600">View all →</a>
+    </div>
+    {% if upcoming %}
+      {% for booking in upcoming %}
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div class="av" style="width:36px;height:36px;font-size:13px;background:var(--teal)">
+          {{ booking.patient.first_name|first|upper }}{{ booking.patient.last_name|first|upper }}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ booking.patient.get_full_name }}</div>
+          <div style="font-size:11px;color:var(--muted)">{{ booking.slot.date }} · {{ booking.slot.start_time|time:"H:i" }}</div>
+        </div>
+        <span class="badge badge-green">Confirmed</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:24px 0">
+        <div class="empty-icon">📋</div>
+        <div class="empty-desc">No upcoming appointments.</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Quick Connect Calendar Banner -->
+
+<div class="cal-banner" style="margin-top:20px">
+  📅 Connect Google Calendar to auto-create events for every appointment.
+  <a href="{% url 'google_oauth_start' %}" class="btn btn-outline btn-sm" style="margin-left:auto;white-space:nowrap">Connect Now</a>
+</div>
+{% endblock %}

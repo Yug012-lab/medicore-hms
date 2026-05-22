@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% block title %}My Appointments — MediCore HMS{% endblock %}
+{% block page_title %}My Appointments{% endblock %}
+{% block nav_mybookings %}active{% endblock %}
+{% block content %}
+<div class="card anim">
+  {% if bookings %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Doctor</th><th>Date & Time</th><th>Notes</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="av" style="width:32px;height:32px;font-size:12px;background:var(--navy)">
+                {{ booking.slot.doctor.first_name|first|upper }}{{ booking.slot.doctor.last_name|first|upper }}
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600">Dr. {{ booking.slot.doctor.get_full_name }}</div>
+                <div style="font-size:11px;color:var(--muted)">{{ booking.slot.doctor.specialty }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:13px;font-weight:500">{{ booking.slot.date }}</div>
+            <div style="font-size:11px;color:var(--muted)">{{ booking.slot.start_time|time:"H:i" }} – {{ booking.slot.end_time|time:"H:i" }}</div>
+          </td>
+          <td style="color:var(--muted);max-width:160px;font-size:12px">{{ booking.notes|default:"—" }}</td>
+          <td>
+            <span class="badge {% if booking.status == 'confirmed' %}badge-green{% else %}badge-red{% endif %}">
+              {{ booking.status|capfirst }}
+            </span>
+          </td>
+          <td>
+            {% if booking.status == 'confirmed' %}
+            <form method="post" action="{% url 'cancel_booking' booking.pk %}" onsubmit="return confirm('Cancel this appointment?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <div class="empty-title">No Appointments Yet</div>
+    <div class="empty-desc">You haven't booked any appointments. Find a doctor to get started.</div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-primary">🏥 Book Appointment</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

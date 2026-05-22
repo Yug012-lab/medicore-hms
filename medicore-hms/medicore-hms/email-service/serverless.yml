@@ -1,0 +1,31 @@
+service: medicore-email-service
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  environment:
+    SMTP_HOST: ${env:SMTP_HOST, 'smtp.gmail.com'}
+    SMTP_PORT: ${env:SMTP_PORT, '587'}
+    SMTP_USER: ${env:SMTP_USER, ''}
+    SMTP_PASS: ${env:SMTP_PASS, ''}
+    FROM_EMAIL: ${env:FROM_EMAIL, 'noreply@medicore.hms'}
+
+functions:
+  sendEmail:
+    handler: handler.send_email
+    events:
+      - http:
+          path: /send-email
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    host: localhost

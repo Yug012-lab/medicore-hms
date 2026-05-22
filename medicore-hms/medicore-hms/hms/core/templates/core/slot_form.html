@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% block title %}Add Slot — MediCore HMS{% endblock %}
+{% block page_title %}Add Availability Slot{% endblock %}
+{% block nav_slots %}active{% endblock %}
+{% block content %}
+<div style="max-width:480px">
+  <div class="card anim">
+    <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:20px">New Availability Slot</h3>
+    <form method="post" action="{% url 'slot_create' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" required/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input type="time" name="start_time" class="form-control" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time</label>
+          <input type="time" name="end_time" class="form-control" required/>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center">Create Slot</button>
+        <a href="{% url 'slot_list' %}" class="btn btn-outline" style="flex:1;justify-content:center">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

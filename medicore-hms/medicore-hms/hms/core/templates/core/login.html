@@ -1,0 +1,102 @@
+{% extends "core/base.html" %}
+{% block auth_content %}
+<style>
+.auth-wrap{min-height:100vh;background:linear-gradient(135deg,#03045e 0%,#0096c7 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{display:flex;border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(3,4,94,.5);width:100%;max-width:880px;min-height:540px}
+.auth-left{flex:1;background:#03045e;padding:44px 40px;display:flex;flex-direction:column;justify-content:space-between}
+.auth-right{width:400px;background:#fff;padding:44px 36px;display:flex;flex-direction:column;justify-content:center;flex-shrink:0}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:36px}
+.auth-logo-icon{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#00b4d8,#0077b6);display:flex;align-items:center;justify-content:center;font-size:24px}
+.auth-title{font-family:'Syne',sans-serif;font-size:27px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:12px}
+.auth-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.9;max-width:340px}
+.feature-list{margin-top:0}
+.feature-item{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.feature-item span:first-child{font-size:15px}
+.feature-item span:last-child{font-size:13px;color:rgba(255,255,255,.55)}
+.demo-box{margin-top:22px;padding:16px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.08)}
+.demo-label{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em}
+.demo-btns{display:flex;gap:8px;flex-wrap:wrap}
+.demo-btn{background:rgba(0,180,216,.15);color:#00b4d8;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.demo-btn:hover{background:rgba(0,180,216,.25)}
+.form-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#03045e;margin-bottom:22px}
+.tab-row{display:flex;background:#f0f7ff;border-radius:10px;padding:4px;margin-bottom:22px}
+.tab-btn{flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-family:inherit;transition:all .18s}
+.tab-btn.active{background:#fff;color:#03045e;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tab-btn:not(.active){background:transparent;color:#64748b;font-weight:400}
+</style>
+<div class="auth-wrap">
+  <div class="auth-box">
+    <!-- Left -->
+    <div class="auth-left">
+      <div>
+        <div class="auth-logo">
+          <div class="auth-logo-icon">🏥</div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#fff">MediCore HMS</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.1em">HOSPITAL MANAGEMENT SYSTEM</div>
+          </div>
+        </div>
+        <div class="auth-title">Smarter Hospital<br/>Management</div>
+        <div class="auth-desc">Manage appointments, doctor availability, patient bookings, email notifications and calendar sync — all in one place.</div>
+      </div>
+      <div>
+        <div class="feature-list">
+          {% for item in features %}
+          <div class="feature-item"><span>{{ item.0 }}</span><span>{{ item.1 }}</span></div>
+          {% endfor %}
+          <div class="feature-item"><span>🔐</span><span>Role-Based Access Control</span></div>
+          <div class="feature-item"><span>⚡</span><span>Race-Condition Safe Booking</span></div>
+          <div class="feature-item"><span>📅</span><span>Google Calendar OAuth2 Sync</span></div>
+          <div class="feature-item"><span>📧</span><span>Serverless Email Notifications</span></div>
+        </div>
+        <div class="demo-box">
+          <div class="demo-label">⚡ Quick Demo Login</div>
+          <div class="demo-btns">
+            <button class="demo-btn" onclick="fillDemo('doctor')">👨‍⚕️ Doctor Demo</button>
+            <button class="demo-btn" onclick="fillDemo('patient')">🧑 Patient Demo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Right -->
+    <div class="auth-right">
+      <div class="form-title">Welcome Back</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="switchTab('login',this)">Sign In</button>
+        <button class="tab-btn" onclick="window.location='{% url 'signup' %}'">Sign Up</button>
+      </div>
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-error" style="margin-bottom:14px">⚠ {{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" id="email-field" class="form-control" placeholder="doctor@hms.com" required value="{{ request.POST.email }}"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-top:4px">
+          Sign In to HMS →
+        </button>
+      </form>
+      <div style="margin-top:18px;text-align:center;font-size:13px;color:#64748b">
+        Don't have an account? <a href="{% url 'signup' %}" style="color:#0077b6;font-weight:600">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function fillDemo(role){
+  if(role==='doctor'){
+    document.getElementById('email-field').value='doctor@demo.com';
+  } else {
+    document.getElementById('email-field').value='patient@demo.com';
+  }
+}
+</script>
+{% endblock %}

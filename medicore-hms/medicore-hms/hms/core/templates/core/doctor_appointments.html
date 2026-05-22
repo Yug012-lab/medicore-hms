@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% block title %}Appointments — MediCore HMS{% endblock %}
+{% block page_title %}Appointments{% endblock %}
+{% block nav_appts %}active{% endblock %}
+{% block content %}
+<div class="card anim">
+  {% if bookings %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Patient</th><th>Date & Time</th><th>Notes</th><th>Status</th><th>Booked At</th></tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="av" style="width:32px;height:32px;font-size:12px;background:var(--teal)">
+                {{ booking.patient.first_name|first|upper }}{{ booking.patient.last_name|first|upper }}
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600">{{ booking.patient.get_full_name }}</div>
+                <div style="font-size:11px;color:var(--muted)">{{ booking.patient.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:13px;font-weight:500">{{ booking.slot.date }}</div>
+            <div style="font-size:11px;color:var(--muted)">{{ booking.slot.start_time|time:"H:i" }} – {{ booking.slot.end_time|time:"H:i" }}</div>
+          </td>
+          <td style="color:var(--muted);max-width:180px;font-size:12px">{{ booking.notes|default:"—" }}</td>
+          <td>
+            <span class="badge {% if booking.status == 'confirmed' %}badge-green{% else %}badge-red{% endif %}">
+              {{ booking.status|capfirst }}
+            </span>
+          </td>
+          <td style="font-size:12px;color:var(--light)">{{ booking.created_at|date:"Y-m-d" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <div class="empty-title">No Appointments Yet</div>
+    <div class="empty-desc">No patients have booked your slots yet. Make sure you have available slots.</div>
+    <a href="{% url 'slot_create' %}" class="btn btn-primary">+ Add Slots</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

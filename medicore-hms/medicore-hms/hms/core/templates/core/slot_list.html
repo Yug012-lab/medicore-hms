@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+{% block title %}My Slots — MediCore HMS{% endblock %}
+{% block page_title %}My Availability Slots{% endblock %}
+{% block nav_slots %}active{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <p style="font-size:13px;color:var(--muted)">Manage the times you're available for patient appointments.</p>
+  <a href="{% url 'slot_create' %}" class="btn btn-primary">+ Add New Slot</a>
+</div>
+<div class="card anim">
+  {% if slots %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Patient</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for slot in slots %}
+        <tr>
+          <td style="font-weight:500">{{ slot.date }}</td>
+          <td>{{ slot.start_time|time:"H:i" }}</td>
+          <td>{{ slot.end_time|time:"H:i" }}</td>
+          <td style="color:var(--muted)">30 min</td>
+          <td>
+            {% if slot.is_booked %}
+              <span class="badge badge-red">Booked</span>
+            {% else %}
+              <span class="badge badge-green">Available</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if slot.is_booked %}
+              {% if slot.booking.patient %}{{ slot.booking.patient.get_full_name }}{% else %}—{% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if not slot.is_booked %}
+            <form method="post" action="{% url 'slot_delete' slot.pk %}" onsubmit="return confirm('Delete this slot?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🗓</div>
+    <div class="empty-title">No Slots Yet</div>
+    <div class="empty-desc">Add your first availability slot so patients can book appointments.</div>
+    <a href="{% url 'slot_create' %}" class="btn btn-primary">+ Add First Slot</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
